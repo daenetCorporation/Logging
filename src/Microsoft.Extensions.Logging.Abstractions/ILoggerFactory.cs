@@ -19,9 +19,15 @@ namespace Microsoft.Extensions.Logging
         ILogger CreateLogger(string categoryName);
 
         /// <summary>
+        /// <para>
+        /// This method is being removed from the ILoggerFactory abstraction, to have similar behavior
+        /// use the concrete LoggerFactory class with Microsoft.Extensions.Logging.LoggerFactory.AddProvider(string, ILoggerProvider)
+        /// </para>
         /// Adds an <see cref="ILoggerProvider"/> to the logging system.
         /// </summary>
         /// <param name="provider">The <see cref="ILoggerProvider"/>.</param>
+        [Obsolete("This method is being removed from the ILoggerFactory abstraction, to have similar behavior" +
+            " use the concrete LoggerFactory class with Microsoft.Extensions.Logging.LoggerFactory.AddProvider(string, ILoggerProvider)")]
         void AddProvider(ILoggerProvider provider);
     }
 }
