@@ -30,12 +30,12 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddEventSourceLogger on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddEventSourceLogger().
         /// </para>
         /// Adds an event logger that is enabled for <see cref="LogLevel"/>.Information or higher.
         /// </summary>
         /// <param name="factory">The extension method argument.</param>
-        [Obsolete("This method is obsolete, use AddEventSourceLogger on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddEventSourceLogger().")]
         public static ILoggerFactory AddEventSourceLogger(this ILoggerFactory factory)
         {
             if (factory == null)

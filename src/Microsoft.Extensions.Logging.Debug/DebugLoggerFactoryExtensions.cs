@@ -23,12 +23,12 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddDebug on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddDebug().
         /// </para>
         /// Adds a debug logger that is enabled for <see cref="LogLevel"/>.Information or higher.
         /// </summary>
         /// <param name="factory">The extension method argument.</param>
-        [Obsolete("This method is obsolete, use AddDebug on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddDebug().")]
         public static ILoggerFactory AddDebug(this ILoggerFactory factory)
         {
             return AddDebug(factory, LogLevel.Information);
@@ -36,13 +36,13 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddDebug on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddDebug().
         /// </para>
         /// Adds a debug logger that is enabled as defined by the filter function.
         /// </summary>
         /// <param name="factory">The extension method argument.</param>
         /// <param name="filter">The function used to filter events based on the log level.</param>
-        [Obsolete("This method is obsolete, use AddDebug on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddDebug().")]
         public static ILoggerFactory AddDebug(this ILoggerFactory factory, Func<string, LogLevel, bool> filter)
         {
             factory.AddProvider(new DebugLoggerProvider(filter));
@@ -51,13 +51,13 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddDebug on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddDebug().
         /// </para>
         /// Adds a debug logger that is enabled for <see cref="LogLevel"/>s of minLevel or higher.
         /// </summary>
         /// <param name="factory">The extension method argument.</param>
         /// <param name="minLevel">The minimum <see cref="LogLevel"/> to be logged</param>
-        [Obsolete("This method is obsolete, use AddDebug on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddDebug().")]
         public static ILoggerFactory AddDebug(this ILoggerFactory factory, LogLevel minLevel)
         {
             return AddDebug(

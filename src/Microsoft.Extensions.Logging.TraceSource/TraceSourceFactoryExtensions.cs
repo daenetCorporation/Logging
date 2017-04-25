@@ -117,12 +117,12 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().
         /// </para>
         /// </summary>
         /// <param name="factory">The <see cref="ILoggerFactory"/> to use.</param>
         /// <param name="switchName">The name of the <see cref="SourceSwitch"/> to use.</param>
-        [Obsolete("This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().")]
         public static ILoggerFactory AddTraceSource(
             this ILoggerFactory factory,
             string switchName)
@@ -142,13 +142,13 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().
         /// </para>
         /// </summary>
         /// <param name="factory">The <see cref="ILoggerFactory"/> to use.</param>
         /// <param name="switchName">The name of the <see cref="SourceSwitch"/> to use.</param>
         /// <param name="listener">The <see cref="TraceListener"/> to use.</param>
-        [Obsolete("This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().")]
         public static ILoggerFactory AddTraceSource(
             this ILoggerFactory factory,
             string switchName,
@@ -174,12 +174,12 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().
         /// </para>
         /// </summary>
         /// <param name="factory">The <see cref="ILoggerFactory"/> to use.</param>
         /// <param name="sourceSwitch">The <see cref="SourceSwitch"/> to use.</param>
-        [Obsolete("This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().")]
         public static ILoggerFactory AddTraceSource(
             this ILoggerFactory factory,
             SourceSwitch sourceSwitch)
@@ -201,13 +201,13 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().
         /// </para>
         /// </summary>
         /// <param name="factory">The <see cref="ILoggerFactory"/> to use.</param>
         /// <param name="sourceSwitch">The <see cref="SourceSwitch"/> to use.</param>
         /// <param name="listener">The <see cref="TraceListener"/> to use.</param>
-        [Obsolete("This method is obsolete, use AddTraceSource on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddTraceSource().")]
         public static ILoggerFactory AddTraceSource(
             this ILoggerFactory factory,
             SourceSwitch sourceSwitch,

@@ -38,12 +38,12 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddAzureWebAppDiagnostics on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddAzureWebAppDiagnostics().
         /// </para>
         /// Adds an Azure Web Apps diagnostics logger.
         /// </summary>
         /// <param name="factory">The extension method argument</param>
-        [Obsolete("This method is obsolete, use AddAzureWebAppDiagnostics on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddAzureWebAppDiagnostics().")]
         public static ILoggerFactory AddAzureWebAppDiagnostics(this ILoggerFactory factory)
         {
             return AddAzureWebAppDiagnostics(factory, new AzureAppServicesDiagnosticsSettings());
@@ -51,13 +51,13 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is obsolete, use AddAzureWebAppDiagnostics on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddAzureWebAppDiagnostics().
         /// </para>
         /// Adds an Azure Web Apps diagnostics logger.
         /// </summary>
         /// <param name="factory">The extension method argument</param>
         /// <param name="settings">The setting object to configure loggers.</param>
-        [Obsolete("This method is obsolete, use AddAzureWebAppDiagnostics on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.AddAzureWebAppDiagnostics().")]
         public static ILoggerFactory AddAzureWebAppDiagnostics(this ILoggerFactory factory, AzureAppServicesDiagnosticsSettings settings)
         {
             if (WebAppContext.Default.IsRunningInAzureWebApp)

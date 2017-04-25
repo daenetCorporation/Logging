@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.Logging.Console
         private static readonly Func<string, LogLevel, bool> trueFilter = (cat, level) => true;
         private static readonly Func<string, LogLevel, bool> falseFilter = (cat, level) => false;
 
-        [Obsolete("This method is obsolete, the recommended alternative is Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider(IConfiguration).")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider(IConfiguration).")]
         public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter, bool includeScopes)
         {
             if (filter == null)
@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.Logging.Console
             _isLegacy = false;
         }
 
-        [Obsolete("This method is obsolete, the recommended alternative is Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider(IConfiguration).")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider(IConfiguration).")]
         public ConsoleLoggerProvider(IConsoleLoggerSettings settings)
         {
             if (settings == null)

@@ -26,12 +26,14 @@ namespace Microsoft.Extensions.Logging.Debug
         }
 
         /// <summary>
-        /// <para>This method is obsolete, the recommended alternative is Microsoft.Extensions.Logging.Debug.DebugLogger(string).</para>
+        /// <para>
+        /// This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.Debug.DebugLogger(string).
+        /// </para>
         /// Initializes a new instance of the <see cref="DebugLogger"/> class.
         /// </summary>
         /// <param name="name">The name of the logger.</param>
         /// <param name="filter">The function used to filter events based on the log level.</param>
-        [Obsolete("This method is obsolete, the recommended alternative is Microsoft.Extensions.Logging.Debug.DebugLogger(string).")]
+        [Obsolete("This method is obsolete and will be removed in a future version. The recommended alternative is Microsoft.Extensions.Logging.Debug.DebugLogger(string).")]
         public DebugLogger(string name, Func<string, LogLevel, bool> filter)
         {
             _name = string.IsNullOrEmpty(name) ? nameof(DebugLogger) : name;
