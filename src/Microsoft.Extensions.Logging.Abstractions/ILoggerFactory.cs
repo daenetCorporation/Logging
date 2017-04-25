@@ -20,14 +20,12 @@ namespace Microsoft.Extensions.Logging
 
         /// <summary>
         /// <para>
-        /// This method is being removed from the ILoggerFactory abstraction, to have similar behavior
-        /// use the concrete LoggerFactory class with Microsoft.Extensions.Logging.LoggerFactory.AddProvider(string, ILoggerProvider)
+        /// This method is obsolete, use AddProvider on the concrete Microsoft.Extensions.Logging.LoggerFactory class.
         /// </para>
         /// Adds an <see cref="ILoggerProvider"/> to the logging system.
         /// </summary>
         /// <param name="provider">The <see cref="ILoggerProvider"/>.</param>
-        [Obsolete("This method is being removed from the ILoggerFactory abstraction, to have similar behavior" +
-            " use the concrete LoggerFactory class with Microsoft.Extensions.Logging.LoggerFactory.AddProvider(string, ILoggerProvider)")]
+        [Obsolete("This method is obsolete, use AddProvider on the concrete Microsoft.Extensions.Logging.LoggerFactory class.")]
         void AddProvider(ILoggerProvider provider);
     }
 }
