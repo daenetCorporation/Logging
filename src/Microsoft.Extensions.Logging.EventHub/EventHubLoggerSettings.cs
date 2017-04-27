@@ -14,6 +14,16 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         public bool IncludeScopes { get; set; }
 
+        public LogLevel MinLevel { get; set; }
+
+        public int RetryMinBackoffTimeInSec { get; set; }
+
+        public int RetryMaxBackoffTimeInSec { get; set; }
+
+        public int MaxRetryCount { get; set; }
+
+        public string CategoryName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public bool TryGetSwitch(string name, out LogLevel level)
         {
             return Switches.TryGetValue(name, out level);

@@ -45,6 +45,7 @@ namespace Microsoft.Extensions.Logging.EventHub
         {
             set
             {
+               
                 m_Current.Value = value;
             }
             get

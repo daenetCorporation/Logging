@@ -42,11 +42,20 @@ namespace Microsoft.Extensions.Logging.EventHub
                 }
                 else
                 {
-                    var message = $"Configuration value '{value}' for setting '{nameof(IncludeScopes)}' is not supported.";
+                    var message = $"Configuration value '{value}' for setting '{nameof(IncludeScopes)}' must be of type boolean.";
                     throw new InvalidOperationException(message);
                 }
             }
         }
+
+        public int RetryMinBackoffTimeInSec { get; set; }
+
+        public int RetryMaxBackoffTimeInSec { get; set; }
+
+        public int MaxRetryCount { get; set; }
+
+        public LogLevel MinLevel { get; set; }
+        public string CategoryName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public bool TryGetSwitch(string name, out LogLevel level)
         {

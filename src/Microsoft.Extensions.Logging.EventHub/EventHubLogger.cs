@@ -16,34 +16,50 @@ namespace Microsoft.Extensions.Logging.EventHub
         private readonly string m_HostName;
         private readonly string m_SasToken;
         private readonly string m_SubSystem;
+        private IEventHubLoggerSettings m_Settings;
+
         private Func<string, LogLevel, bool> m_Filter;
+
         private bool m_IncludeScopes;
 
         private HttpClient m_Client;
 
+        //private EventHubClient m_EventHubClient;
+
         #region Public Methods
 
-        public EventHubLogger(string categoryName, string eventHubName, string hostName, string sasToken, string subSstem, Func<string, LogLevel, bool> filter, bool includeScopes)
+        public EventHubLogger(IEventHubLoggerSettings settings, Func<string, LogLevel, bool> filter = null)
         {
-            if (categoryName == null)
-            {
-                throw new ArgumentNullException(nameof(categoryName));
-            }
+            //if (categoryName == null)
+            //{
+            //    throw new ArgumentNullException(nameof(categoryName));
+            //}
 
-            m_Filter = filter ?? ((category, logLevel) => true);
+            if (filter == null)
+                m_Filter = filter ?? ((category, logLevel) => true);
+            else
+                m_Filter = filter;
 
-            m_CategoryName = categoryName;
-            m_EventHubName = eventHubName;
-            m_HostName = hostName;
-            m_SasToken = sasToken;
-            m_SubSystem = subSstem;
-            m_IncludeScopes = includeScopes;
+            this.m_Settings = settings;
+            //m_CategoryName = categoryName;
+            //m_EventHubName = eventHubName;
+            //m_HostName = hostName;
+            //m_SasToken = sasToken;
+            //m_SubSystem = subSstem;
+            //m_IncludeScopes = includeScopes;
 
-            m_Client = new HttpClient
-            {
-                BaseAddress = new Uri(string.Format("https://{0}", m_HostName))
-            };
-            m_Client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", m_SasToken);
+            //m_Client = new HttpClient
+            //{
+            //    BaseAddress = new Uri(string.Format("https://{0}", m_HostName))
+            //};
+            //m_Client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", m_SasToken);
+
+            //m_EventHubClient = EventHubClient.CreateFromConnectionString(m_Settings.ConnectionString);
+
+            //m_EventHubClient.RetryPolicy = new RetryExponential(minBackoff: TimeSpan.FromSeconds(m_Settings.RetryMinBackoffTimeInSec),
+            //                                                 maxBackoff: TimeSpan.FromSeconds(m_Settings.RetryMaxBackoffTimeInSec),
+            //                                                 maxRetryCount: m_Settings.MaxRetryCount);
+
         }
 
         public bool IsEnabled(LogLevel logLevel)

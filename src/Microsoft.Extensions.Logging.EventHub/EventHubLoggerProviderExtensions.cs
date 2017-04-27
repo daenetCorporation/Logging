@@ -23,44 +23,71 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// <param name="sasToken"></param>
         /// <param name="subSystem"></param>
         /// <returns></returns>
-        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, string eventHubName, string serviceBusNamespace, string sasToken, string subSystem)
+        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, 
+            IEventHubLoggerSettings settings, 
+            Func<string, LogLevel, bool> filter
+            )
         {
-            loggerFactory.AddProvider(new EventHubLoggerProvider(eventHubName, serviceBusNamespace, sasToken, subSystem, (n, l) => l >= LogLevel.Information));
+            if (filter == null)
+                filter = (n, l) => l >= LogLevel.Information;
+
+            loggerFactory.AddProvider(new EventHubLoggerProvider(settings,filter));
 
             return loggerFactory;
         }
+
 
         /// <summary>
-        /// Add Eventhub with no filter
+        /// Add EventHub and load settings from configuration
         /// </summary>
         /// <param name="loggerFactory"></param>
-        /// <param name="connectionString"></param>
+        /// <param name="config"></param>
         /// <returns></returns>
-        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, string connectionString)
+        public static ILoggerFactory AddEventHubLogger(this ILoggerFactory loggerFactory, IConfiguration config,
+            Func<string, LogLevel, bool> filter)
         {
-            loggerFactory.AddEventHub((n, l) => l >= LogLevel.Information, false, connectionString);
+            var settings = new ConfigurationEventHubLoggerSettings(config);
+
+            loggerFactory.AddEventHub(settings, filter);
 
             return loggerFactory;
         }
 
-        /// <summary>
-        /// Add EventHub with filter
-        /// </summary>
-        /// <param name="loggerFactory"></param>
-        /// <param name="filter"></param>
-        /// <param name="includeScopes"></param>
-        /// <param name="connectionString"></param>
-        /// <returns></returns>
-        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, Func<string, LogLevel, bool> filter, bool includeScopes, string connectionString)
-        {
-            var tokenData = getTokenData(connectionString);
+        ///// <summary>
+        ///// Add EventHub with settings
+        ///// </summary>
+        ///// <param name="loggerFactory"></param>
+        ///// <param name="settings"></param>
+        ///// <returns></returns>
+        //public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, IEventHubLoggerSettings settings)
+        //{
+        //    var tokenData = getTokenData(settings.ConnectionString);
 
-            var sasToken = createToken(tokenData.HostName, tokenData.KeyName, tokenData.KeySecret);
+        //    var sasToken = createToken(tokenData);
 
-            loggerFactory.AddProvider(new EventHubLoggerProvider(tokenData.EntityPath, tokenData.HostName, sasToken, null, filter, includeScopes));
+        //    loggerFactory.AddProvider(new EventHubLoggerProvider(tokenData.EntityPath, tokenData.HostName, sasToken, null, settings, settings.IncludeScopes));
 
-            return loggerFactory;
-        }
+        //    return loggerFactory;
+        //}
+
+        ///// <summary>
+        ///// Add EventHub with filter
+        ///// </summary>
+        ///// <param name="loggerFactory"></param>
+        ///// <param name="filter"></param>
+        ///// <param name="includeScopes"></param>
+        ///// <param name="connectionString"></param>
+        ///// <returns></returns>
+        //public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, Func<string, LogLevel, bool> filter, bool includeScopes, string connectionString)
+        //{
+        //    var tokenData = getTokenData(connectionString);
+
+        //    var sasToken = createToken(tokenData.HostName, tokenData.KeyName, tokenData.KeySecret);
+
+        //    loggerFactory.AddProvider(new EventHubLoggerProvider(tokenData.EntityPath, tokenData.HostName, sasToken, null, filter, includeScopes));
+
+        //    return loggerFactory;
+        //}
 
         /// <summary>
         /// Add EventHub with MinLevel filter for all sources
@@ -70,46 +97,15 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// <param name="includeScopes"></param>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        public static ILoggerFactory AddEventHub(
-            this ILoggerFactory factory,
-            LogLevel minLevel,
-            bool includeScopes, string connectionString)
-        {
-            factory.AddEventHub((category, logLevel) => logLevel >= minLevel, includeScopes, connectionString);
-            return factory;
-        }
+        //public static ILoggerFactory AddEventHub(
+        //    this ILoggerFactory factory,
+        //    LogLevel minLevel,
+        //    bool includeScopes, string connectionString)
+        //{
+        //    factory.AddEventHub((category, logLevel) => logLevel >= minLevel, includeScopes, connectionString);
+        //    return factory;
+        //}
 
-        /// <summary>
-        /// Add EventHub and load settings from configuration
-        /// </summary>
-        /// <param name="loggerFactory"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public static ILoggerFactory AddEventHubLogger(this ILoggerFactory loggerFactory, IConfiguration config)
-        {
-            var settings = new ConfigurationEventHubLoggerSettings(config);
-
-            loggerFactory.AddEventHub(settings);
-
-            return loggerFactory;
-        }
-
-        /// <summary>
-        /// Add EventHub with settings
-        /// </summary>
-        /// <param name="loggerFactory"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, IEventHubLoggerSettings settings)
-        {
-            var tokenData = getTokenData(settings.ConnectionString);
-
-            var sasToken = createToken(tokenData);
-
-            loggerFactory.AddProvider(new EventHubLoggerProvider(tokenData.EntityPath, tokenData.HostName, sasToken, null, settings, settings.IncludeScopes));
-
-            return loggerFactory;
-        }
 
         #endregion
 
