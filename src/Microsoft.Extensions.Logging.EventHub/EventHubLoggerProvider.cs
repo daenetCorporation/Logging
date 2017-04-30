@@ -16,16 +16,14 @@ namespace Microsoft.Extensions.Logging.EventHub
     {
         private readonly ConcurrentDictionary<string, EventHubLogger> m_Loggers = new ConcurrentDictionary<string, EventHubLogger>();
 
-        //private string m_EventHubName;
-        //private string m_Hostname;
-        //private string m_SasToken;
-        private string m_SubSystem;
+      
         private Func<string, LogLevel, bool> m_Filter;
         private IEventHubLoggerSettings m_Settings;
-        private bool m_IncludeScopes;
+     
 
         public EventHubLoggerProvider(IEventHubLoggerSettings settings, Func<string, LogLevel, bool> filter, bool includeScopes = false)
         {
+            this.m_Filter = filter;
             this.m_Settings = settings;
         }
         //public EventHubLoggerProvider(string eventHubName, string serviceBusNamespace, string sasToken, string subSystem, Func<string, LogLevel, bool> filter, bool includeScopes = false)

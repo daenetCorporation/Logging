@@ -22,8 +22,8 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         public int MaxRetryCount { get; set; }
 
-        public string CategoryName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
+        public string CategoryName { get; set; }
+       
         public bool TryGetSwitch(string name, out LogLevel level)
         {
             return Switches.TryGetValue(name, out level);

@@ -86,17 +86,29 @@ namespace Microsoft.Extensions.Logging.EventHub
 
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-            m_Client.PostAsync(url, content);
+           // m_Client.PostAsync(url, content);
         }
+
+
+        private EventHubLogScopeManager m_ScopeManager;
 
         public IDisposable BeginScope<TState>(TState state)
         {
+            IDisposable scope;
+
             if (state == null)
             {
                 throw new ArgumentNullException(nameof(state));
             }
 
-            return EventHubLogScope.Push(m_CategoryName, state);
+            if (m_ScopeManager == null)
+            {
+                m_ScopeManager = new EventHubLogScopeManager(state);
+            }
+          
+            scope = m_ScopeManager.Push(state);           
+
+            return scope;
         }
 
         #endregion
@@ -125,40 +137,11 @@ namespace Microsoft.Extensions.Logging.EventHub
                 data.exception = exString;
 
             if (m_IncludeScopes)
-                data.scope = getScopeInformation();
+                data.scope = this.m_ScopeManager.Current;
 
             return data;
         }
 
-        private string getScopeInformation()
-        {
-            StringBuilder builder = new StringBuilder();
-
-            var current = EventHubLogScope.Current;
-            string scopeLog = string.Empty;
-            var length = builder.Length;
-
-            while (current != null)
-            {
-                if (length == builder.Length)
-                {
-                    scopeLog = $"=> {current}";
-                }
-                else
-                {
-                    scopeLog = $"=> {current} ";
-                }
-
-                builder.Insert(length, scopeLog);
-                current = current.Parent;
-            }
-            //if (builder.Length > length)
-            //{
-            //    builder.Insert(length);
-            //    builder.AppendLine();
-            //}
-            return builder.ToString();
-        }
 
         #endregion
     }
