@@ -76,7 +76,8 @@ namespace Microsoft.Extensions.Logging.EventHub
                 }
             }
 
-            return (n, l) => false;
+            return (n, l) => 
+            false;
         }
 
         private IEnumerable<string> getKeyPrefixes(string name)

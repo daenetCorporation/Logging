@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Azure.EventHubs;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
@@ -48,6 +49,28 @@ namespace Microsoft.Extensions.Logging.EventHub
             }
         }
 
+        public bool IncludeExceptionStackTrace
+        {
+            get
+            {
+                bool includeScopes;
+                var value = m_Configuration["IncludeExceptionStackTrace"];
+                if (string.IsNullOrEmpty(value))
+                {
+                    return false;
+                }
+                else if (bool.TryParse(value, out includeScopes))
+                {
+                    return includeScopes;
+                }
+                else
+                {
+                    var message = $"Configuration value '{value}' for setting '{nameof(IncludeExceptionStackTrace)}' must be of type boolean.";
+                    throw new InvalidOperationException(message);
+                }
+            }
+        }
+
         public int RetryMinBackoffTimeInSec { get; set; }
 
         public int RetryMaxBackoffTimeInSec { get; set; }
@@ -83,6 +106,28 @@ namespace Microsoft.Extensions.Logging.EventHub
             }
         }
 
+        public RetryPolicy RetryPolicy
+        {
+            get
+            {
+              
+                var value = m_Configuration.GetSection("RetryPolicy");
+                if(value == null)
+                {
+                    return null;
+                }              
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            set {
+
+            }
+
+        }
+
+        public Func<LogLevel, EventId, string, Exception, EventData> EventDataFormatter { get; set; }
 
         #region Private Methods
 
@@ -97,6 +142,6 @@ namespace Microsoft.Extensions.Logging.EventHub
                 return value;
         }
 
-        #endregion
+         #endregion
     }
 }

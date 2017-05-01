@@ -1,12 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventHub;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ConsoleApp.EventHubTest
 {
     class Program
     {
+        private static string m_Connstr = "TODO";
+
         static void Main(string[] args)
         {
             Test2();
@@ -29,9 +32,11 @@ namespace ConsoleApp.EventHubTest
         {
             EventHubLoggerSettings settings = new EventHubLoggerSettings()
             {
-                ConnectionString = "",
+                ConnectionString = m_Connstr,
                 IncludeScopes = true,
                 CategoryName = "CAT1",
+                Switches = new Dictionary<string, LogLevel>()
+                { { "Program", LogLevel.Debug }, }
             };
 
             ILoggerFactory loggerFactory = new LoggerFactory()
@@ -40,8 +45,7 @@ namespace ConsoleApp.EventHubTest
                 return true;
             });
 
-        
-            ILogger logger = loggerFactory.CreateLogger<Program>();
+                ILogger logger = loggerFactory.CreateLogger<Program>();
 
             logger.LogInformation(
             "This is a test of the emergency broadcast system.");

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
+    /// <summary>
+    /// Handles scopes.
+    /// </summary>
     internal class EventHubLogScopeManager
     {
         internal readonly AsyncLocal<List<DisposableScope>> m_AsyncSopes;
@@ -16,7 +19,7 @@ namespace Microsoft.Extensions.Logging.EventHub
         internal EventHubLogScopeManager(object state)
         {
             m_AsyncSopes = new AsyncLocal<List<DisposableScope>>();
-
+            this.m_AsyncSopes.Value = new List<DisposableScope>();
             m_State = state;
         }
 
@@ -35,17 +38,14 @@ namespace Microsoft.Extensions.Logging.EventHub
         }
 
 
-       // public EventHubLogScope Parent { get; private set; }
-
-
 
         public IDisposable Push(object state)
         {
             lock ("scope")
             {
-                string scopeName = Guid.NewGuid().ToString();
+               // string scopeName = Guid.NewGuid().ToString();
 
-                var newScope = new DisposableScope(scopeName, this);
+                var newScope = new DisposableScope(state.ToString(), this);
 
                 this.m_AsyncSopes.Value.Add(newScope);
 
@@ -82,6 +82,11 @@ namespace Microsoft.Extensions.Logging.EventHub
 
                     m_ScopeMgr.m_AsyncSopes.Value.Remove(me);
                 }
+            }
+
+            public override string ToString()
+            {
+                return this.m_ScopeName;
             }
         }
     }

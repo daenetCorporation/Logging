@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Azure.EventHubs;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Microsoft.Extensions.Logging.EventHub
 {
     public class EventHubLogger : ILogger
     {
-        private readonly string m_CategoryName;
+
         private readonly string m_EventHubName;
         private readonly string m_HostName;
         private readonly string m_SasToken;
@@ -22,9 +23,7 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         private bool m_IncludeScopes;
 
-        private HttpClient m_Client;
-
-        //private EventHubClient m_EventHubClient;
+        private EventHubClient m_EventHubClient;
 
         #region Public Methods
 
@@ -41,52 +40,48 @@ namespace Microsoft.Extensions.Logging.EventHub
                 m_Filter = filter;
 
             this.m_Settings = settings;
-            //m_CategoryName = categoryName;
-            //m_EventHubName = eventHubName;
-            //m_HostName = hostName;
-            //m_SasToken = sasToken;
-            //m_SubSystem = subSstem;
-            //m_IncludeScopes = includeScopes;
 
-            //m_Client = new HttpClient
-            //{
-            //    BaseAddress = new Uri(string.Format("https://{0}", m_HostName))
-            //};
-            //m_Client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", m_SasToken);
+            if (this.m_Settings.EventDataFormatter == null)
+            {
+                this.m_Settings.EventDataFormatter = defaultEventFormatter;
+            }
 
-            //m_EventHubClient = EventHubClient.CreateFromConnectionString(m_Settings.ConnectionString);
+            m_EventHubClient = EventHubClient.CreateFromConnectionString(m_Settings.ConnectionString);
 
-            //m_EventHubClient.RetryPolicy = new RetryExponential(minBackoff: TimeSpan.FromSeconds(m_Settings.RetryMinBackoffTimeInSec),
-            //                                                 maxBackoff: TimeSpan.FromSeconds(m_Settings.RetryMaxBackoffTimeInSec),
-            //                                                 maxRetryCount: m_Settings.MaxRetryCount);
+            if (m_Settings.RetryPolicy != null)
+                m_EventHubClient.RetryPolicy = m_Settings.RetryPolicy;
 
         }
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return m_Filter(m_CategoryName, logLevel);
+            return m_Filter(this.m_Settings.CategoryName, logLevel);
         }
 
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> exceptionFormatter)
         {
             if (!IsEnabled(logLevel))
             {
                 return;
             }
 
-            string url;
+            EventData ehEvent = m_Settings.EventDataFormatter(logLevel, eventId, state.ToString(), exception);
 
-            if (!String.IsNullOrEmpty(m_SubSystem))
-                url = string.Format("{0}/publishers/{1}/messages", m_EventHubName, m_SubSystem);
-            else
-                url = $"{m_EventHubName}/messages";
+            //string url;
 
-            var payload = JsonConvert.SerializeObject(convertToAnonymous(logLevel, eventId, state, exception, formatter));
+            //if (!String.IsNullOrEmpty(m_SubSystem))
+            //    url = string.Format("{0}/publishers/{1}/messages", m_EventHubName, m_SubSystem);
+            //else
+            //    url = $"{m_EventHubName}/messages";
 
-            var content = new StringContent(payload, Encoding.UTF8, "application/json");
+            //var payload = JsonConvert.SerializeObject(convertToAnonymous(logLevel, eventId, state, exception, exceptionFormatter));
 
-           // m_Client.PostAsync(url, content);
+            //var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            //EventData data = new EventData(Encoding.UTF8.GetBytes(payload));
+
+            m_EventHubClient.SendAsync(ehEvent).Wait();
         }
 
 
@@ -105,8 +100,8 @@ namespace Microsoft.Extensions.Logging.EventHub
             {
                 m_ScopeManager = new EventHubLogScopeManager(state);
             }
-          
-            scope = m_ScopeManager.Push(state);           
+
+            scope = m_ScopeManager.Push(state);
 
             return scope;
         }
@@ -115,16 +110,48 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         #region Private Methods
 
-        private object convertToAnonymous<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        /// <summary>
+        /// Implements default formatter for event data, which will be sent to EventHub.
+        /// </summary>
+        /// <param name="logLevel"></param>
+        /// <param name="eventId"></param>
+        /// <param name="message"></param>
+        /// <param name="exception"></param>
+        /// <returns></returns>
+        private EventData defaultEventFormatter(LogLevel logLevel, EventId eventId, string message, Exception exception)
         {
-            string exString = string.Empty;
-            if (exception != null)
+            var obj = new
             {
-                exString = formatter(state, exception);
-            }
+                Name = m_Settings.CategoryName,
+                Scope = m_ScopeManager == null ? null : m_ScopeManager.Current,
+                EventId = eventId.ToString(),
+                Message = message,
+                Level = logLevel,
+                LocalEnqueuedTime = DateTime.Now.ToString("O"),
+                Exception = exception == null ? null : new
+                {
+                    Message = exception.Message,
+                    Type = exception.GetType().Name,
+                    StackTrace = exception.StackTrace
+                }
+            };
+
+            var payload = JsonConvert.SerializeObject(obj);
+
+            EventData data = new EventData(Encoding.UTF8.GetBytes(payload));
+
+            return data;
+        }
+
+        private object convertToAnonymous<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> exceptionFormatter)
+        {
+            string errMsg;
+
+            if (exception != null && exceptionFormatter != null)
+                errMsg = exceptionFormatter(state, exception);
 
             dynamic data = new System.Dynamic.ExpandoObject();
-            data.name = m_CategoryName;
+            data.name = m_Settings.CategoryName;
             data.eventId = eventId.ToString();
             data.message = state;
             data.level = logLevel;
@@ -133,8 +160,7 @@ namespace Microsoft.Extensions.Logging.EventHub
             if (!String.IsNullOrEmpty(m_SubSystem))
                 data.system = m_SubSystem;
 
-            if (!String.IsNullOrEmpty(exString))
-                data.exception = exString;
+
 
             if (m_IncludeScopes)
                 data.scope = this.m_ScopeManager.Current;
