@@ -53,6 +53,13 @@ namespace Microsoft.Extensions.Logging.EventHub
             return loggerFactory;
         }
 
+        public static IEventHubLoggerSettings GetSettings(this IConfiguration config)
+        {
+            EventHubLoggerSettings settings = new EventHubLoggerSettings();
+
+            throw new NotImplementedException();
+        }
+
         ///// <summary>
         ///// Add EventHub with settings
         ///// </summary>
