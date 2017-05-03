@@ -12,14 +12,13 @@ namespace Microsoft.Extensions.Logging.EventHub
     /// </summary>
     internal class EventHubLogScopeManager
     {
-        internal readonly AsyncLocal<List<DisposableScope>> m_AsyncSopes;
+        internal static readonly AsyncLocal<List<DisposableScope>> m_AsyncSopes = new AsyncLocal<List<DisposableScope>>();
 
         private object m_State;
 
         internal EventHubLogScopeManager(object state)
         {
-            m_AsyncSopes = new AsyncLocal<List<DisposableScope>>();
-            this.m_AsyncSopes.Value = new List<DisposableScope>();
+            m_AsyncSopes.Value = new List<DisposableScope>();
             m_State = state;
         }
 
@@ -28,7 +27,7 @@ namespace Microsoft.Extensions.Logging.EventHub
             get
             {
                 StringBuilder sb = new StringBuilder(); 
-                foreach (var item in this.m_AsyncSopes.Value)
+                foreach (var item in m_AsyncSopes.Value)
                 {
                     sb.Append($"/{item}");
                 }
@@ -47,7 +46,7 @@ namespace Microsoft.Extensions.Logging.EventHub
 
                 var newScope = new DisposableScope(state.ToString(), this);
 
-                this.m_AsyncSopes.Value.Add(newScope);
+                m_AsyncSopes.Value.Add(newScope);
 
                 return newScope;
             }
@@ -74,13 +73,13 @@ namespace Microsoft.Extensions.Logging.EventHub
             {
                 lock ("scope")
                 {
-                    var me = m_ScopeMgr.m_AsyncSopes.Value.FirstOrDefault(s => s == this);
+                    var me = EventHubLogScopeManager.m_AsyncSopes.Value.FirstOrDefault(s => s == this);
                     if (me == null)
                     {
                         throw new InvalidOperationException("This should never happen!");
                     }
 
-                    m_ScopeMgr.m_AsyncSopes.Value.Remove(me);
+                    EventHubLogScopeManager.m_AsyncSopes.Value.Remove(me);
                 }
             }
 

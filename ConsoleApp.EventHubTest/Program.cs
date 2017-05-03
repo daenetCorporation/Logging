@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging.EventHub;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Debug;
+
 
 namespace ConsoleApp.EventHubTest
 {
@@ -41,14 +43,19 @@ namespace ConsoleApp.EventHubTest
                 { { "Program", LogLevel.Debug }, }
             };
 
-           
-            ILoggerFactory loggerFactory = new LoggerFactory()
-                .AddEventHub(settings, (string a, LogLevel l) =>
-            {
-                return true;
-            });
 
-                ILogger logger = loggerFactory.CreateLogger<Program>();
+            //ILoggerFactory loggerFactory = new LoggerFactory()
+            //    .AddEventHub(settings, (string a, LogLevel l) =>
+            //{
+            //    return true;
+            //});
+
+            ILoggerFactory loggerFactory = new LoggerFactory()
+            .AddConsole(includeScopes: true);
+           // .AddDebug();
+            
+            ILogger logger = loggerFactory.CreateLogger<Program>();
+            ILogger logger2 = loggerFactory.CreateLogger("SECONDLOGGER");
 
             logger.LogInformation(
             "This is a test of the emergency broadcast system.");
@@ -63,6 +70,8 @@ namespace ConsoleApp.EventHubTest
                 {
                     logger.LogInformation(DateTime.Now.ToString());
                 }
+
+                logger2.LogError(new EventId(77, "txt789"), "789 msg");
             }
 
             using (logger.BeginScope<string>("MYSCOPE2.0"))
@@ -70,7 +79,9 @@ namespace ConsoleApp.EventHubTest
                 logger.LogInformation(DateTime.Now.ToString());
             }
 
-            Console.WriteLine("Hello World!");
+         
+            Console.ReadLine();
+   
         }
 
         private static void Test3()
@@ -118,6 +129,7 @@ namespace ConsoleApp.EventHubTest
                 }
             });
 
+            Console.ReadLine();
             Console.WriteLine("Hello World!");
         }
 
