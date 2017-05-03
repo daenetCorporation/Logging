@@ -13,7 +13,6 @@ namespace Microsoft.Extensions.Logging.EventHub
     internal class EventHubLogScopeManager
     {
         internal static readonly AsyncLocal<List<DisposableScope>> m_AsyncSopes = new AsyncLocal<List<DisposableScope>>();
-
         private object m_State;
 
         internal EventHubLogScopeManager(object state)
@@ -36,14 +35,10 @@ namespace Microsoft.Extensions.Logging.EventHub
             }
         }
 
-
-
         public IDisposable Push(object state)
         {
             lock ("scope")
             {
-               // string scopeName = Guid.NewGuid().ToString();
-
                 var newScope = new DisposableScope(state.ToString(), this);
 
                 m_AsyncSopes.Value.Add(newScope);
@@ -60,32 +55,31 @@ namespace Microsoft.Extensions.Logging.EventHub
         internal class DisposableScope : IDisposable
         {
             private EventHubLogScopeManager m_ScopeMgr;
-
             private string m_ScopeName;
 
             public DisposableScope(string scopeName, EventHubLogScopeManager scopeMgr)
             {
-                this.m_ScopeName = scopeName;
-                this.m_ScopeMgr = scopeMgr;
+                m_ScopeName = scopeName;
+                m_ScopeMgr = scopeMgr;
             }
 
             public void Dispose()
             {
                 lock ("scope")
                 {
-                    var me = EventHubLogScopeManager.m_AsyncSopes.Value.FirstOrDefault(s => s == this);
+                    var me = m_AsyncSopes.Value.FirstOrDefault(s => s == this);
                     if (me == null)
                     {
                         throw new InvalidOperationException("This should never happen!");
                     }
 
-                    EventHubLogScopeManager.m_AsyncSopes.Value.Remove(me);
+                    m_AsyncSopes.Value.Remove(me);
                 }
             }
 
             public override string ToString()
             {
-                return this.m_ScopeName;
+                return m_ScopeName;
             }
         }
     }
