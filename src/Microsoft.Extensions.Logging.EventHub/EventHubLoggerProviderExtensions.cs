@@ -16,17 +16,17 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// Add EventHub with no filter
         /// </summary>
         /// <param name="loggerFactory"></param>
-        /// <param name="eventHubName"></param>
-        /// <param name="serviceBusNamespace"></param>
-        /// <param name="sasToken"></param>
-        /// <param name="subSystem"></param>
+        /// <param name="settings"></param>
+        /// <param name="filter">Optional filter function, which implements the filter logic.</param>
+        /// <remarks>If filter function is specified, all possibly defined switches will be ignored.</remarks>
         /// <returns></returns>
         public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, 
             IEventHubLoggerSettings settings, 
-            Func<string, LogLevel, bool> filter)
+            Func<string, LogLevel, bool> filter = null)
         {
-            if (filter == null)
-                filter = (n, l) => l >= LogLevel.Information;
+            //if (filter == null)
+            //    filter = (n, l) => l >= LogLevel.Information;
+
 
             loggerFactory.AddProvider(new EventHubLoggerProvider(settings, filter));
 

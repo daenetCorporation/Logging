@@ -1,10 +1,10 @@
 {
 	"IncludeScopes": true,
-	"Switches": {
-		"Program": 1
-	},
+  "Switches": {
+    "Microsoft.Extensions.Logging.EventHub.Test": 1
+  },
 	"EventHub": {
-		"ConnectionString": "Endpoint=sb://eventhubnamespacename3.servicebus.windows.net/;SharedAccessKeyName=send;SharedAccessKey=cEEtxGzkSu4CYKTLXEZ+twKRBM5inArIJlVVkSAXztM=;EntityPath=p1-eventhub",
+		"ConnectionString": "TODO",
 		"IncludeExceptionStackTrace": false,
 		"RetryPolicy": 0
 	}

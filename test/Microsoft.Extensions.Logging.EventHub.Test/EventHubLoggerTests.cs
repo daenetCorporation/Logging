@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
 
         public EventHubLoggerTests()
         {
-            InitializeEventHubLogger(null);
+            initializeEventHubLogger(null);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
             }
         }
 
-        private void InitializeEventHubLogger(Func<string, LogLevel, bool> filter)
+        private void initializeEventHubLogger(Func<string, LogLevel, bool> filter)
         {
             ConfigurationBuilder cfgBuilder = new ConfigurationBuilder();
             cfgBuilder.AddJsonFile(@"EventHubLoggerSettings.json");

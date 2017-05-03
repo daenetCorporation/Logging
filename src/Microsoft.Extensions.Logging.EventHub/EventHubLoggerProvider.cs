@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Text;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
@@ -52,17 +53,27 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         private IEnumerable<string> getKeyPrefixes(string name)
         {
-            while (!string.IsNullOrEmpty(name))
+            List<string> names = new List<string>();
+
+            var tokens = name.Split('.');
+
+            names.Add(name);
+       
+            string currName = name;
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < tokens.Length-1; i++)
             {
-                yield return name;
-                var lastIndexOfDot = name.LastIndexOf('.');
-                if (lastIndexOfDot == -1)
-                {
-                    yield return "Default";
-                    break;
-                }
-                name = name.Substring(0, lastIndexOfDot);
+                sb.Append(tokens[i]);
+                names.Add(sb.ToString());
+                if(i<tokens.Length-1)
+                    sb.Append(".");
             }
+
+            names.Add("Default");
+
+            return names;
         }
 
         public void Dispose()
