@@ -12,13 +12,13 @@ namespace Microsoft.Extensions.Logging.EventHub
     /// </summary>
     internal class EventHubLogScopeManager
     {
-        internal static readonly AsyncLocal<List<DisposableScope>> m_AsyncSopes;
+        internal static readonly AsyncLocal<List<DisposableScope>> m_AsyncSopes = new AsyncLocal<List<DisposableScope>>();
+
         private object m_State;
 
         internal EventHubLogScopeManager(object state)
         {
             m_AsyncSopes.Value = new List<DisposableScope>();
-
             m_State = state;
         }
 
@@ -36,10 +36,14 @@ namespace Microsoft.Extensions.Logging.EventHub
             }
         }
 
+
+
         public IDisposable Push(object state)
         {
             lock ("scope")
             {
+               // string scopeName = Guid.NewGuid().ToString();
+
                 var newScope = new DisposableScope(state.ToString(), this);
 
                 m_AsyncSopes.Value.Add(newScope);
@@ -61,8 +65,8 @@ namespace Microsoft.Extensions.Logging.EventHub
 
             public DisposableScope(string scopeName, EventHubLogScopeManager scopeMgr)
             {
-                m_ScopeName = scopeName;
-                m_ScopeMgr = scopeMgr;
+                this.m_ScopeName = scopeName;
+                this.m_ScopeMgr = scopeMgr;
             }
 
             public void Dispose()
@@ -81,7 +85,7 @@ namespace Microsoft.Extensions.Logging.EventHub
 
             public override string ToString()
             {
-                return m_ScopeName;
+                return this.m_ScopeName;
             }
         }
     }
