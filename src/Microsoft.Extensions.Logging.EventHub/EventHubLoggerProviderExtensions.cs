@@ -1,12 +1,10 @@
-﻿
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Azure.EventHubs;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
@@ -25,97 +23,31 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// <returns></returns>
         public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, 
             IEventHubLoggerSettings settings, 
-            Func<string, LogLevel, bool> filter
-            )
+            Func<string, LogLevel, bool> filter)
         {
             if (filter == null)
                 filter = (n, l) => l >= LogLevel.Information;
 
-            loggerFactory.AddProvider(new EventHubLoggerProvider(settings,filter));
+            loggerFactory.AddProvider(new EventHubLoggerProvider(settings, filter));
 
             return loggerFactory;
         }
 
-
-        /// <summary>
-        /// Add EventHub and load settings from configuration
-        /// </summary>
-        /// <param name="loggerFactory"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public static ILoggerFactory AddEventHubLogger(this ILoggerFactory loggerFactory, IConfiguration config,
-            Func<string, LogLevel, bool> filter)
-        {
-            var settings = new ConfigurationEventHubLoggerSettings(config);
-
-            loggerFactory.AddEventHub(settings, filter);
-
-            return loggerFactory;
-        }
-
-        public static IEventHubLoggerSettings GetSettings(this IConfiguration config)
+        public static IEventHubLoggerSettings GetEventHubLoggerSettings(this IConfiguration config)
         {
             EventHubLoggerSettings settings = new EventHubLoggerSettings();
 
-            throw new NotImplementedException();
+            settings.IncludeScopes = config.GetValue<bool>("IncludeScopes");
+            config.GetSection("Switches").Bind(settings.Switches);
+
+            settings.ConnectionString = config.GetSection("EventHub").GetValue<string>("ConnectionString");
+            settings.IncludeExceptionStackTrace = config.GetSection("EventHub").GetValue<bool>("IncludeExceptionStackTrace");
+            settings.RetryPolicy = getRetryPolicy(config.GetSection("EventHub").GetValue<int>("RetryPolicy"));
+
+            return settings;
         }
 
-        ///// <summary>
-        ///// Add EventHub with settings
-        ///// </summary>
-        ///// <param name="loggerFactory"></param>
-        ///// <param name="settings"></param>
-        ///// <returns></returns>
-        //public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, IEventHubLoggerSettings settings)
-        //{
-        //    var tokenData = getTokenData(settings.ConnectionString);
-
-        //    var sasToken = createToken(tokenData);
-
-        //    loggerFactory.AddProvider(new EventHubLoggerProvider(tokenData.EntityPath, tokenData.HostName, sasToken, null, settings, settings.IncludeScopes));
-
-        //    return loggerFactory;
-        //}
-
-        ///// <summary>
-        ///// Add EventHub with filter
-        ///// </summary>
-        ///// <param name="loggerFactory"></param>
-        ///// <param name="filter"></param>
-        ///// <param name="includeScopes"></param>
-        ///// <param name="connectionString"></param>
-        ///// <returns></returns>
-        //public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, Func<string, LogLevel, bool> filter, bool includeScopes, string connectionString)
-        //{
-        //    var tokenData = getTokenData(connectionString);
-
-        //    var sasToken = createToken(tokenData.HostName, tokenData.KeyName, tokenData.KeySecret);
-
-        //    loggerFactory.AddProvider(new EventHubLoggerProvider(tokenData.EntityPath, tokenData.HostName, sasToken, null, filter, includeScopes));
-
-        //    return loggerFactory;
-        //}
-
-        /// <summary>
-        /// Add EventHub with MinLevel filter for all sources
-        /// </summary>
-        /// <param name="factory"></param>
-        /// <param name="minLevel"></param>
-        /// <param name="includeScopes"></param>
-        /// <param name="connectionString"></param>
-        /// <returns></returns>
-        //public static ILoggerFactory AddEventHub(
-        //    this ILoggerFactory factory,
-        //    LogLevel minLevel,
-        //    bool includeScopes, string connectionString)
-        //{
-        //    factory.AddEventHub((category, logLevel) => logLevel >= minLevel, includeScopes, connectionString);
-        //    return factory;
-        //}
-
-
         #endregion
-
 
         #region Private Methods
 
@@ -204,10 +136,27 @@ namespace Microsoft.Extensions.Logging.EventHub
         private static Dictionary<string, string> parseConnectionString(string connString)
         {
             Dictionary<string, string> connStringParts = connString.Split(';')
-    .Select(t => t.Split(new char[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries))
-    .ToDictionary(t => t[0].Trim(), t => t[1].Trim(), StringComparer.CurrentCultureIgnoreCase);
+                .Select(t => t.Split(new char[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries))
+                .ToDictionary(t => t[0].Trim(), t => t[1].Trim(), StringComparer.CurrentCultureIgnoreCase);
 
             return connStringParts;
+        }
+
+        /// <summary>
+        /// If RetryPolicy in Configuration File is set to 0, then there will be no retry.
+        /// All other values will be interpreted as default retry policy.
+        /// </summary>
+        /// <param name="policyValue">Integer value in IConfiguration</param>
+        /// <returns>RetryPolicy type object.</returns>
+        private static RetryPolicy getRetryPolicy(int policyValue)
+        {
+            switch (policyValue)
+            {
+                case 0:
+                    return RetryPolicy.NoRetry;
+                default:
+                    return RetryPolicy.Default;
+            }
         }
 
         #endregion

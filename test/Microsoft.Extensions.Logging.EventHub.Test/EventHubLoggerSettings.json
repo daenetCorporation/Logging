@@ -1,0 +1,11 @@
+{
+	"IncludeScopes": true,
+	"Switches": {
+		"Program": 1
+	},
+	"EventHub": {
+		"ConnectionString": "Endpoint=sb://eventhubnamespacename3.servicebus.windows.net/;SharedAccessKeyName=send;SharedAccessKey=cEEtxGzkSu4CYKTLXEZ+twKRBM5inArIJlVVkSAXztM=;EntityPath=p1-eventhub",
+		"IncludeExceptionStackTrace": false,
+		"RetryPolicy": 0
+	}
+}

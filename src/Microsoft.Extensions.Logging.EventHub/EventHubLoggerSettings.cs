@@ -17,18 +17,11 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         public bool IncludeExceptionStackTrace { get; set; }
 
-        public LogLevel MinLevel { get; set; }
-
-        public string CategoryName { get; set; }
-
         public RetryPolicy RetryPolicy { get ; set; }
 
         public bool TryGetSwitch(string name, out LogLevel level)
         {
             return Switches.TryGetValue(name, out level);
         }
-
-        public Func<LogLevel, EventId, string, Exception, EventData> EventDataFormatter { get; set; }
-
     }
 }

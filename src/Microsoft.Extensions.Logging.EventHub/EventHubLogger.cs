@@ -1,50 +1,40 @@
-﻿using Microsoft.Azure.EventHubs;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
+﻿using System;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Azure.EventHubs;
+using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
     public class EventHubLogger : ILogger
     {
-
         private readonly string m_EventHubName;
         private readonly string m_HostName;
         private readonly string m_SasToken;
         private readonly string m_SubSystem;
+
         private IEventHubLoggerSettings m_Settings;
-
         private Func<string, LogLevel, bool> m_Filter;
-
         private bool m_IncludeScopes;
+        private string m_CategoryName;
 
         private EventHubClient m_EventHubClient;
+        private EventHubLogScopeManager m_ScopeManager;
+
+        public Func<LogLevel, EventId, string, Exception, EventData> EventDataFormatter { get; set; }
 
         #region Public Methods
 
-        public EventHubLogger(IEventHubLoggerSettings settings, Func<string, LogLevel, bool> filter = null)
+        public EventHubLogger(IEventHubLoggerSettings settings, string categoryName, Func<string, LogLevel, bool> filter = null, Func<LogLevel, EventId, string, Exception, EventData> eventDataFormatter = null)
         {
-            //if (categoryName == null)
-            //{
-            //    throw new ArgumentNullException(nameof(categoryName));
-            //}
-
             if (filter == null)
                 m_Filter = filter ?? ((category, logLevel) => true);
             else
                 m_Filter = filter;
 
-            this.m_Settings = settings;
+            m_Settings = settings;
+            m_CategoryName = categoryName;
 
-            if (this.m_Settings.EventDataFormatter == null)
-            {
-                this.m_Settings.EventDataFormatter = defaultEventFormatter;
-            }
+            EventDataFormatter = EventDataFormatter == null ? defaultEventFormatter : eventDataFormatter;
 
             m_EventHubClient = EventHubClient.CreateFromConnectionString(m_Settings.ConnectionString);
 
@@ -53,12 +43,6 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         }
 
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return m_Filter(this.m_Settings.CategoryName, logLevel);
-        }
-
-
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> exceptionFormatter)
         {
             if (!IsEnabled(logLevel))
@@ -66,31 +50,13 @@ namespace Microsoft.Extensions.Logging.EventHub
                 return;
             }
 
-            EventData ehEvent = m_Settings.EventDataFormatter(logLevel, eventId, state.ToString(), exception);
-
-            //string url;
-
-            //if (!String.IsNullOrEmpty(m_SubSystem))
-            //    url = string.Format("{0}/publishers/{1}/messages", m_EventHubName, m_SubSystem);
-            //else
-            //    url = $"{m_EventHubName}/messages";
-
-            //var payload = JsonConvert.SerializeObject(convertToAnonymous(logLevel, eventId, state, exception, exceptionFormatter));
-
-            //var content = new StringContent(payload, Encoding.UTF8, "application/json");
-
-            //EventData data = new EventData(Encoding.UTF8.GetBytes(payload));
+            EventData ehEvent = EventDataFormatter(logLevel, eventId, state.ToString(), exception);
 
             m_EventHubClient.SendAsync(ehEvent).Wait();
         }
 
-
-        private EventHubLogScopeManager m_ScopeManager;
-
         public IDisposable BeginScope<TState>(TState state)
         {
-            IDisposable scope;
-
             if (state == null)
             {
                 throw new ArgumentNullException(nameof(state));
@@ -101,9 +67,14 @@ namespace Microsoft.Extensions.Logging.EventHub
                 m_ScopeManager = new EventHubLogScopeManager(state);
             }
 
-            scope = m_ScopeManager.Push(state);
+            var scope = m_ScopeManager.Push(state);
 
             return scope;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return m_Filter(m_CategoryName, logLevel);
         }
 
         #endregion
@@ -122,7 +93,7 @@ namespace Microsoft.Extensions.Logging.EventHub
         {
             var obj = new
             {
-                Name = m_Settings.CategoryName,
+                Name = m_CategoryName,
                 Scope = m_ScopeManager == null ? null : m_ScopeManager.Current,
                 EventId = eventId.ToString(),
                 Message = message,
@@ -142,32 +113,6 @@ namespace Microsoft.Extensions.Logging.EventHub
 
             return data;
         }
-
-        private object convertToAnonymous<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> exceptionFormatter)
-        {
-            string errMsg;
-
-            if (exception != null && exceptionFormatter != null)
-                errMsg = exceptionFormatter(state, exception);
-
-            dynamic data = new System.Dynamic.ExpandoObject();
-            data.name = m_Settings.CategoryName;
-            data.eventId = eventId.ToString();
-            data.message = state;
-            data.level = logLevel;
-            data.time = DateTime.UtcNow.ToString("O");
-
-            if (!String.IsNullOrEmpty(m_SubSystem))
-                data.system = m_SubSystem;
-
-
-
-            if (m_IncludeScopes)
-                data.scope = this.m_ScopeManager.Current;
-
-            return data;
-        }
-
 
         #endregion
     }
