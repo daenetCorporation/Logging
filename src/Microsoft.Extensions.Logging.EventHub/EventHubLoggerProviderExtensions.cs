@@ -22,11 +22,11 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// <returns></returns>
         public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, 
             IEventHubLoggerSettings settings, 
-            Func<string, LogLevel, bool> filter = null)
+            Func<string, LogLevel, bool> filter = null,
+            string providerName = "")
         {
             //if (filter == null)
             //    filter = (n, l) => l >= LogLevel.Information;
-
 
             loggerFactory.AddProvider(new EventHubLoggerProvider(settings, filter));
 
