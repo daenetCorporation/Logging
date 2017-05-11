@@ -13,7 +13,8 @@ namespace ConsoleApp.EventHubTest
 
         static void Main(string[] args)
         {
-            Test2();
+            Test2(); 
+
         }
 
         private static void Test1()
@@ -43,7 +44,7 @@ namespace ConsoleApp.EventHubTest
             ILogger logger = loggerFactory.CreateLogger<Program>();
 
             logger.LogInformation(
-            "This is a test of the emergency broadcast system.");
+            "This is a test of the emergency broadcast system.{0}-{1}", 1, "prm2");
 
             logger.LogCritical(new EventId(123, "txt123"), "123 message");
             logger.LogError(new EventId(456, "txt456"), "456 msg");
