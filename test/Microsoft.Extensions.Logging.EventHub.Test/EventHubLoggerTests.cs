@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
             initializeEventHubLogger(null);
         }
 
-        [Fact]
+        [Fact(DisplayName= "EH_LogsAllTypesNoFilter")]
         public void LogsAllTypesNoFilter()
         {
             m_Logger.LogTrace("Test Trace Log Message");
@@ -24,7 +24,15 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
             m_Logger.LogCritical(new EventId(123, "txt123"), "123 Test Critical Log Message");
         }
 
-        [Fact]
+        [Fact(DisplayName = "EH_LogWithFormat")]
+        public void LogWithFormat()
+        {
+          
+            m_Logger.LogTrace("{PRM1}, Test {PRM2} Log Message", 1, "2");
+
+        }
+
+        [Fact(DisplayName = "EH_LogsInformationWithScopesNoFilter")]
         public void LogsInformationWithScopesNoFilter()
         {
             using (m_Logger.BeginScope<string>("MYSCOPE1.0"))
@@ -51,7 +59,7 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
 
             ILoggerFactory loggerFactory = new LoggerFactory()
                 .AddEventHub(configRoot.GetEventHubLoggerSettings(), filter);
-
+           
             m_Logger = loggerFactory.CreateLogger<EventHubLoggerTests>();
         }
     }

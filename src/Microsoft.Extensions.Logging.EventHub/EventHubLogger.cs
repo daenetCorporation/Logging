@@ -2,6 +2,7 @@
 using System.Text;
 using Microsoft.Azure.EventHubs;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging.Internal;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
@@ -20,11 +21,11 @@ namespace Microsoft.Extensions.Logging.EventHub
         private EventHubClient m_EventHubClient;
         private EventHubLogScopeManager m_ScopeManager;
 
-        public Func<LogLevel, EventId, string, Exception, EventData> EventDataFormatter { get; set; }
+        public Func<LogLevel, EventId, object, Exception, EventData> EventDataFormatter { get; set; }
 
         #region Public Methods
 
-        public EventHubLogger(IEventHubLoggerSettings settings, string categoryName, Func<string, LogLevel, bool> filter = null, Func<LogLevel, EventId, string, Exception, EventData> eventDataFormatter = null)
+        public EventHubLogger(IEventHubLoggerSettings settings, string categoryName, Func<string, LogLevel, bool> filter = null, Func<LogLevel, EventId, object, Exception, EventData> eventDataFormatter = null)
         {
             if (filter == null)
                 m_Filter = filter ?? ((category, logLevel) => true);
@@ -50,7 +51,7 @@ namespace Microsoft.Extensions.Logging.EventHub
                 return;
             }
 
-            EventData ehEvent = EventDataFormatter(logLevel, eventId, state.ToString(), exception);
+            EventData ehEvent = EventDataFormatter(logLevel, eventId, state, exception);
 
             m_EventHubClient.SendAsync(ehEvent).Wait();
         }
@@ -89,29 +90,40 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// <param name="message"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        private EventData defaultEventFormatter(LogLevel logLevel, EventId eventId, string message, Exception exception)
+        private EventData defaultEventFormatter(LogLevel logLevel, EventId eventId, object state, Exception exception)
         {
-            var obj = new
+            System.Dynamic.ExpandoObject expando = new System.Dynamic.ExpandoObject();
+            var data = (System.Collections.Generic.IDictionary<String, Object>)expando;
+
+            data.Add("Name", m_CategoryName);
+            data.Add("Scope", m_ScopeManager == null ? null : m_ScopeManager.Current);
+            data.Add("EventId", eventId.ToString());
+            data.Add("Message", state.ToString());
+            data.Add("Level", logLevel);
+            data.Add("LocalEnqueuedTime", DateTime.Now.ToString("O"));
+            data.Add("Exception", exception == null ? null : new
             {
-                Name = m_CategoryName,
-                Scope = m_ScopeManager == null ? null : m_ScopeManager.Current,
-                EventId = eventId.ToString(),
-                Message = message,
-                Level = logLevel,
-                LocalEnqueuedTime = DateTime.Now.ToString("O"),
-                Exception = exception == null ? null : new
+                Message = exception.Message,
+                Type = exception.GetType().Name,
+                StackTrace = exception.StackTrace
+            });
+
+            if (state is FormattedLogValues)
+            {
+                FormattedLogValues v = state as FormattedLogValues;
+                foreach (var item in v)
                 {
-                    Message = exception.Message,
-                    Type = exception.GetType().Name,
-                    StackTrace = exception.StackTrace
+                    data.Add(item.Key, item.Value);
                 }
-            };
+            }
 
-            var payload = JsonConvert.SerializeObject(obj);
+            var payload = JsonConvert.SerializeObject(data);
 
-            EventData data = new EventData(Encoding.UTF8.GetBytes(payload));
+            EventData eventData = new EventData(Encoding.UTF8.GetBytes(payload));
 
-            return data;
+            System.Diagnostics.Debug.WriteLine(payload);
+
+            return eventData;
         }
 
         #endregion

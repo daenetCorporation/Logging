@@ -1,11 +1,11 @@
 {
 	"IncludeScopes": true,
   "Switches": {
-    "Microsoft.Extensions.Logging.EventHub.Test": 1
+    "Microsoft.Extensions.Logging.EventHub.Test.EventHubLoggerTests": 0
   },
-	"EventHub": {
-		"ConnectionString": "TODO",
-		"IncludeExceptionStackTrace": false,
-		"RetryPolicy": 0
-	}
+  "EventHub": {
+    "ConnectionString": "todo",
+    "IncludeExceptionStackTrace": false,
+    "RetryPolicy": 0
+  }
 }
