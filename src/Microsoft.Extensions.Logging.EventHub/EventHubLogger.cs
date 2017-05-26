@@ -3,6 +3,8 @@ using System.Text;
 using Microsoft.Azure.EventHubs;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging.Internal;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Microsoft.Extensions.Logging.EventHub
 {
@@ -21,21 +23,40 @@ namespace Microsoft.Extensions.Logging.EventHub
         private EventHubClient m_EventHubClient;
         private EventHubLogScopeManager m_ScopeManager;
 
+        /// <summary>
+        /// List of key value pairs, which will be logged with every message.
+        /// </summary>
+        private Dictionary<string, object> m_AdditionalValues;
+
         public Func<LogLevel, EventId, object, Exception, EventData> EventDataFormatter { get; set; }
 
         #region Public Methods
 
-        public EventHubLogger(IEventHubLoggerSettings settings, string categoryName, Func<string, LogLevel, bool> filter = null, Func<LogLevel, EventId, object, Exception, EventData> eventDataFormatter = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="categoryName"></param>
+        /// <param name="filter"></param>
+        /// <param name="eventDataFormatter"></param>
+        /// <param name="additionalValues">List of key value pairs, which will be logged with every message.</param>
+        public EventHubLogger(IEventHubLoggerSettings settings, 
+            string categoryName, Func<string, LogLevel, bool> filter = null, 
+            Func<LogLevel, EventId, object, Exception, EventData> eventDataFormatter = null,
+            Dictionary<string, object> additionalValues = null)
         {
             if (filter == null)
                 m_Filter = filter ?? ((category, logLevel) => true);
             else
                 m_Filter = filter;
 
+            this.m_AdditionalValues = additionalValues;
+
             m_Settings = settings;
+
             m_CategoryName = categoryName;
 
-            EventDataFormatter = EventDataFormatter == null ? defaultEventFormatter : eventDataFormatter;
+            EventDataFormatter = eventDataFormatter == null ? defaultEventFormatter : eventDataFormatter;
 
             m_EventHubClient = EventHubClient.CreateFromConnectionString(m_Settings.ConnectionString);
 
@@ -52,6 +73,8 @@ namespace Microsoft.Extensions.Logging.EventHub
             }
 
             EventData ehEvent = EventDataFormatter(logLevel, eventId, state, exception);
+
+            Debug.WriteLine($">>{JsonConvert.SerializeObject(ehEvent)}");
 
             m_EventHubClient.SendAsync(ehEvent).Wait();
         }
@@ -107,6 +130,14 @@ namespace Microsoft.Extensions.Logging.EventHub
                 Type = exception.GetType().Name,
                 StackTrace = exception.StackTrace
             });
+
+            if (this.m_AdditionalValues != null)
+            {
+                foreach (var item in this.m_AdditionalValues)
+                {
+                    data.Add(item.Key, item.Value);
+                }
+            }
 
             if (state is FormattedLogValues)
             {

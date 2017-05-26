@@ -4,7 +4,7 @@
     "Microsoft.Extensions.Logging.EventHub.Test.EventHubLoggerTests": 0
   },
   "EventHub": {
-    "ConnectionString": "todo",
+    "ConnectionString": "TODO",
     "IncludeExceptionStackTrace": false,
     "RetryPolicy": 0
   }

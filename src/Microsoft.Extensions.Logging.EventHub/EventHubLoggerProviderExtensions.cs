@@ -18,17 +18,22 @@ namespace Microsoft.Extensions.Logging.EventHub
         /// <param name="loggerFactory"></param>
         /// <param name="settings"></param>
         /// <param name="filter">Optional filter function, which implements the filter logic.</param>
+        /// <param name="eventDataFormatter"></param>
+        /// <param name="additionalValues"></param>
+        /// <param name="providerName"></param>
         /// <remarks>If filter function is specified, all possibly defined switches will be ignored.</remarks>
         /// <returns></returns>
-        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory, 
-            IEventHubLoggerSettings settings, 
+        public static ILoggerFactory AddEventHub(this ILoggerFactory loggerFactory,
+            IEventHubLoggerSettings settings,
             Func<string, LogLevel, bool> filter = null,
+            Func<LogLevel, EventId, object, Exception, EventData> eventDataFormatter = null,
+           Dictionary<string, object> additionalValues = null,
             string providerName = "")
         {
             //if (filter == null)
             //    filter = (n, l) => l >= LogLevel.Information;
 
-            loggerFactory.AddProvider(new EventHubLoggerProvider(settings, filter));
+            loggerFactory.AddProvider(new EventHubLoggerProvider(settings, filter, eventDataFormatter, additionalValues));
 
             return loggerFactory;
         }

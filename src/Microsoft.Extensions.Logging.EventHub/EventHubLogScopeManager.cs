@@ -17,7 +17,6 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         internal EventHubLogScopeManager(object state)
         {
-            m_AsyncSopes.Value = new List<DisposableScope>();
             m_State = state;
         }
 
@@ -37,9 +36,12 @@ namespace Microsoft.Extensions.Logging.EventHub
 
         public IDisposable Push(object state)
         {
-            lock ("scope")
+            //lock ("scope")
             {
                 var newScope = new DisposableScope(state.ToString(), this);
+
+                if(m_AsyncSopes.Value == null)
+                    m_AsyncSopes.Value = new List<DisposableScope>();
 
                 m_AsyncSopes.Value.Add(newScope);
 
@@ -65,7 +67,7 @@ namespace Microsoft.Extensions.Logging.EventHub
 
             public void Dispose()
             {
-                lock ("scope")
+                //lock ("scope")
                 {
                     var me = m_AsyncSopes.Value.FirstOrDefault(s => s == this);
                     if (me == null)

@@ -1,6 +1,8 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Xunit;
+using Microsoft.Azure.EventHubs;
+using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Logging.EventHub.Test
 {
@@ -24,13 +26,32 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
             m_Logger.LogCritical(new EventId(123, "txt123"), "123 Test Critical Log Message");
         }
 
+
+        /// <summary>
+        /// Tests logging of formatted messages.
+        /// </summary>
         [Fact(DisplayName = "EH_LogWithFormat")]
         public void LogWithFormat()
-        {
-          
+        {          
             m_Logger.LogTrace("{PRM1}, Test {PRM2} Log Message", 1, "2");
-
         }
+
+
+        /// <summary>
+        /// Tests logging of formatted messages.
+        /// </summary>
+        [Fact(DisplayName = "EH_LogWithAdditionalData")]
+        public void LogWithAdditionalData()
+        {
+            initializeEventHubLogger(null, null, new Dictionary<string, object>()
+            {
+                { "HOSTNAME", "HostName"},
+                { "SomeInt", 42},
+            });
+
+            m_Logger.LogTrace("{PRM1}, Test {PRM2} Log Message", 1, "2");
+        }
+
 
         [Fact(DisplayName = "EH_LogsInformationWithScopesNoFilter")]
         public void LogsInformationWithScopesNoFilter()
@@ -51,14 +72,16 @@ namespace Microsoft.Extensions.Logging.EventHub.Test
             }
         }
 
-        private void initializeEventHubLogger(Func<string, LogLevel, bool> filter)
+        private void initializeEventHubLogger(Func<string, LogLevel, bool> filter,
+              Func<LogLevel, EventId, object, Exception, EventData> eventDataFormatter = null,
+           Dictionary<string, object> additionalValues = null)
         {
             ConfigurationBuilder cfgBuilder = new ConfigurationBuilder();
             cfgBuilder.AddJsonFile(@"EventHubLoggerSettings.json");
             var configRoot = cfgBuilder.Build();
 
             ILoggerFactory loggerFactory = new LoggerFactory()
-                .AddEventHub(configRoot.GetEventHubLoggerSettings(), filter);
+                .AddEventHub(configRoot.GetEventHubLoggerSettings(), filter, eventDataFormatter, additionalValues);
            
             m_Logger = loggerFactory.CreateLogger<EventHubLoggerTests>();
         }
