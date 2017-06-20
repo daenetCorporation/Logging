@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Debug;
 
 namespace Microsoft.Extensions.Logging
@@ -12,13 +13,14 @@ namespace Microsoft.Extensions.Logging
     public static class DebugLoggerFactoryExtensions
     {
         /// <summary>
-        /// Adds a debug logger.
+        /// Adds a debug logger named 'Debug' to the factory.
         /// </summary>
-        /// <param name="factory">The extension method argument.</param>
-        public static LoggerFactory AddDebug(this LoggerFactory factory)
+        /// <param name="builder">The extension method argument.</param>
+        public static ILoggingBuilder AddDebug(this ILoggingBuilder builder)
         {
-            factory.AddProvider("Debug", new DebugLoggerProvider());
-            return factory;
+            builder.Services.AddSingleton<ILoggerProvider, DebugLoggerProvider>();
+
+            return builder;
         }
 
         /// <summary>

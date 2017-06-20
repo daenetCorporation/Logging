@@ -18,8 +18,7 @@ namespace Microsoft.Extensions.Logging.Debug
         /// Initializes a new instance of the <see cref="DebugLogger"/> class.
         /// </summary>
         /// <param name="name">The name of the logger.</param>
-        public DebugLogger(string name)
-            : this(name, filter: null)
+        public DebugLogger(string name) : this(name, filter: null)
         {
         }
 
