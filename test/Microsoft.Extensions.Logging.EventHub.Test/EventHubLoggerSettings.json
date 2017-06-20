@@ -4,7 +4,7 @@
     "Microsoft.Extensions.Logging.EventHub.Test.EventHubLoggerTests": 0
   },
   "EventHub": {
-    "ConnectionString": "TODO",
+    "ConnectionString": "Endpoint=sb://misplog2.servicebus.cloudapi.de/;SharedAccessKeyName=sendlisten;SharedAccessKey=g4Nn09Bi7l33h3rd9Bpgdn3ZB3l3rPHNuBgI3UVC4gc=;EntityPath=loggertesthub",
     "IncludeExceptionStackTrace": false,
     "RetryPolicy": 0
   }

@@ -3,10 +3,12 @@
   <PropertyGroup>
     <Description>Azure EventHub logger provider implementation for Microsoft.Extensions.Logging.
     Implemented by daenet</Description>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>logging</PackageTags>
+    <SignAssembly>false</SignAssembly>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
